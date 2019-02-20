@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body onload="handlers.selectDanceMoves(), handlers.showSelectedDanceMoves()">
+   
+   <h2>Class Schedule</h2>
+    
+    <table>
+        <tr> <!-- prikazi subotu i nedelju. Dodaj add a new group feature -->
+            <th class="group-shower">Group 1</th>
+            <td class="date-shower"></td>
+            <td><select name="" id="select-moves-for-today" onchange="handlers.getSelectedDanceMoves()"></select></td>
+        </tr>
+        <tr>
+            <td><ul class="dance-list-display-group-1"></ul></td>
+        </tr>
+        <tr>
+            <th>Group 2</th>
+            <td><select name="" id=""></select></td>
+            <ul></ul>
+        </tr>
+        <tr>
+            <th>Group 3</th>
+            <td><select name="" id=""></select></td>
+            <ul></ul>
+        </tr>
+    </table>
+    
+    
+    <script src="app.js"></script>
+</body>
+</html>

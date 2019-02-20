@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body onload="handlers.getNextWeekend(), handlers.displayAttendenceList()"> <!-- dodaj sort by group.. -->
+    <div>
+        <button>&larr;</button>
+        <h2>Attendance History</h2>
+        <button>&rarr;</button>
+    </div>
+    
+    <h2 class="todays-date"></h2>
+    
+    <table>
+        <tr>
+            <th>Name</th>
+            <th class="saturday-display"></th>
+            <th class="sunday-display"></th>
+        </tr>
+<!--
+        <tr>
+            <td>Aleksandar Radulovic</td>
+            <td><input type="checkbox" name="" id=""></td>
+            <td><input type="checkbox" name="" id=""></td>
+        </tr>
+        <tr>
+            <td>Aleksandar Radulovic</td>
+            <td><input type="checkbox" name="" id=""></td>
+            <td><input type="checkbox" name="" id=""></td>
+        </tr>
+-->
+        <tbody class="attendence-people-list">
+        </tbody
+    </table>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body onload="handlers.displayPeople()">
+    <h2>Aqua Salseros</h2>
+    <button><a href="new-member-page.html">Add a new member</a></button>
+    <!-- dodaj view profile button za svakog clana -->
+    <table>
+     
+        <label for="">Sort by</label>
+        <select name="" id="select" onchange="handlers.sortPeopleList()">
+            <option value="name">Name</option>
+            <option value="name">Group</option>
+            <option value="name" selected>Date</option>
+        </select>
+        <tr>
+            <th>Name</th>
+            <th>Recommended By</th>
+            <th>Started on</th>
+            <th>Group</th>
+        </tr>
+        <tbody class="display-people-list">
+        </tbody>      
+    </table>
+        
+    <script src="app.js"></script>
+</body>
+</html>

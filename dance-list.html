@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body onload="handlers.showDanceMoves()"> <!-- dodaj edit funkciju i filter funkciju -->
+    <h2>Dance list</h2>
+    <input type="text" placeholder="Add a new dance move" class="dance-move-input" onKeyUp="handlers.filterThruDanceList()" autocomplete="on">
+    <button id="add-dance-move-button" onclick="handlers.addDanceMove(event)">Add</button>
+    <ul class="list-of-dance-moves"></ul> 
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body onload="handlers.getNamesOfMembers()">
+    
+    <h2>Add a new member</h2>
+    
+    <label for="">Name</label>
+    <input type="text" class="member-name-input">
+    
+    <label for="">Recommended by</label>
+    <input type="text" id="recommended-input">
+    <select name="" id="list-of-members">
+<!--        // via js, people list, create one option for one person-->
+    </select> 
+    
+    <label for="">Start date</label> 
+<!--    // date object-->
+    <input type="date" id="start-date">
+    
+    
+    <label for="">Group</label>
+    <input type="text">
+    <select name="" id="group"> // via js .. create a new group .. bachiata etc ..
+        <option value="beginner">beginner</option>
+        <option value="intermediate">intermediate</option>
+        <option value="advanced">advanced</option>
+    </select>
+    
+    <button class="add-member" onclick="handlers.createNewMember()">Confirm</button>
+    
+    
+    <script src="app.js"></script>
+</body>
+</html>
