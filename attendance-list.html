@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Document</title>
 </head>
-<body onload="handlers.getNextWeekend(), handlers.displayAttendenceList()"> <!-- dodaj sort by group.. -->
+<body onload="handlers.getNextWeekend(), handlers.displayAttendenceList(), handlers.checkAttendenceList('3/2/2019')"> <!-- dodaj sort by group.. -->
     <div>
         <button>&larr;</button>
         <h2>Attendance History</h2>
@@ -19,20 +19,9 @@
             <th class="saturday-display"></th>
             <th class="sunday-display"></th>
         </tr>
-<!--
-        <tr>
-            <td>Aleksandar Radulovic</td>
-            <td><input type="checkbox" name="" id=""></td>
-            <td><input type="checkbox" name="" id=""></td>
-        </tr>
-        <tr>
-            <td>Aleksandar Radulovic</td>
-            <td><input type="checkbox" name="" id=""></td>
-            <td><input type="checkbox" name="" id=""></td>
-        </tr>
--->
+        
         <tbody class="attendence-people-list">
-        </tbody
+        </tbody>
     </table>
     <script src="app.js"></script>
 </body>
