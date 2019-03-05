@@ -4,29 +4,15 @@
     <meta charset="UTF-8">
     <title>Document</title>
 </head>
-<body onload="handlers.selectDanceMoves(), handlers.showSelectedDanceMoves()">
+<body onload="handlers.getDanceScheduleElements(event)">
    
    <h2>Class Schedule</h2>
-    <!-- prikazi korake u formi labela i checkbox i dodaj dugme addAClassSchedule -->
-    <table>
-        <tr> <!-- prikazi subotu i nedelju. Dodaj add a new group feature -->
-            <th class="group-shower">Group 1</th>
-            <td class="date-shower">3/2/2019</td>
-            <td><select name="" id="select-moves-for-today" onchange="handlers.getSelectedDanceMoves()"></select></td>
-        </tr>
-        <tr>
-            <td><ul class="dance-list-display-group-1"></ul></td>
-        </tr>
-        <tr>
-            <th>Group 2</th>
-            <td><select name="" id=""></select></td>
-            <ul></ul>
-        </tr>
-        <tr>
-            <th>Group 3</th>
-            <td><select name="" id=""></select></td>
-            <ul></ul>
-        </tr>
+    <!-- prikazi korake u formi labela i checkbox i dodaj dugme addAClassSchedule, 
+    dodaj paid property i neki alert(modal) ko sve nije platio nakon na primer pola meseca..
+    rating koraka (mozda), add a new group, emphasize added danceMoves letters - filterThru funkcija -->
+    <button><a href="group-list.html">Create a new group</a></button>
+    <table class="group-container">
+    
     </table>
     
     

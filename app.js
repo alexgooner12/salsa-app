@@ -1,6 +1,6 @@
 const appStorage = {
     keys: {
-        danceList: 'dance-list', listOfPeople: 'list-of-people', listOfDanceSchedules: 'list-of-dance-schedules', attendanceList: 'attendance-list'
+        danceList: 'dance-list', listOfPeople: 'list-of-people', listOfDanceSchedules: 'list-of-dance-schedules', attendanceList: 'attendance-list', groupList: 'group-list', paymentList: 'payment-list'
     },
     
     listOfPeople: {
@@ -41,26 +41,169 @@ const appStorage = {
         setAttendanceList() {
             localStorage.setItem(appStorage.keys.attendanceList, JSON.stringify(app.attendanceList));
         }  
+    },
+    
+    groups: {
+        getGroupList() {
+            return JSON.parse(localStorage.getItem(appStorage.keys.groupList)) || [];
+        },
+        
+        setGroupList() {
+            localStorage.setItem(appStorage.keys.groupList, JSON.stringify(app.listOfGroups));
+
+        }
+    },
+    
+    paymentList: {
+        getPaymentList() {
+            return JSON.parse(localStorage.getItem(appStorage.keys.paymentList)) || [];
+        },
+        
+        setPaymentList() {
+            localStorage.setItem(appStorage.keys.paymentList, JSON.stringify(app.paymentList));
+        }
+        
     }
+    
 
 };
 
 const handlers = {
     getCurrentMonth() {
-        const currentMonthElement = document.getElementsByClassName('current-month')[0];
         const currentMonthIndex = new Date().getMonth();
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        currentMonthElement.textContent = monthNames[currentMonthIndex];
+        return monthNames[currentMonthIndex];
     },
 
     addDanceMove(event) {
         const input = document.getElementsByClassName('dance-move-input')[0];
-        if (event.target.id === 'add-dance-move-button' && input.value) {
+        const danceMoveHasBeenAdded = handlers.hasBeenAdded(app.danceList, input.value);
+        if (event.target.id === 'add-dance-move-button' && input.value && !danceMoveHasBeenAdded) {
             app.danceList.push(input.value);
-            input.value = '';
             appStorage.danceList.setDanceList();
             this.showDanceMoves();
         }
+        input.value = '';
+    },
+    
+    hasBeenAdded(list, element) {
+        return list.includes(element);
+    },
+    
+    createGroup(event) {
+        const input = document.getElementsByClassName('group-maker-input')[0];
+        const groupHasBeenCreated = handlers.hasBeenAdded(app.listOfGroups, input.value);
+        if (event.target.id === 'group-maker' && input.value && !groupHasBeenCreated) {
+            app.listOfGroups.push(input.value);
+            appStorage.groups.setGroupList();
+            handlers.showGroupList();
+        }
+        input.value = '';
+    },
+    
+    deleteGroup(event) {
+        const index = event.target.id;
+        app.listOfGroups.splice(index, 1);
+        appStorage.groups.setGroupList();
+        handlers.showGroupList();
+    },
+    
+    createDeleteGroupButton(id) {
+        const button = document.createElement('button');
+        button.textContent = 'Delete';
+        button.id = id;
+        button.addEventListener('click', handlers.deleteGroup);
+        return button;
+    },
+    
+    populateGroupList() {
+        const ul = document.createElement('ul');
+        app.listOfGroups.forEach((group, index) => {
+            const li = document.createElement('li');
+            li.textContent = group;
+            li.id = index;
+            const button = this.createDeleteGroupButton(index);
+            li.appendChild(button);
+            ul.appendChild(li);
+        });
+        return ul;
+    },
+    
+    showGroupList() {
+        const groupContainer = document.getElementsByClassName('group-list-container')[0];
+        groupContainer.innerHTML = '';
+        const ul = this.populateGroupList();
+        groupContainer.appendChild(ul);
+    },
+    
+    getNamesOfGroups() {
+        const groupList = app.listOfGroups;
+        const selectELement = document.getElementById('group-selector');
+
+        groupList.forEach(group => {
+            const optionElement = document.createElement('option');
+            optionElement.value = group;
+            optionElement.textContent = group;
+            selectELement.appendChild(optionElement);
+        });
+    },
+    
+    getScheduledMoves(index) {
+        let danceMoves = [];
+        app.listOfDanceSchedules.forEach(danceSchedule => {
+            if (danceSchedule.id === index) {
+                danceSchedule.danceMoves.forEach(danceMove => {
+                    danceMoves.push(danceMove);
+                });
+            }
+        });
+        
+        return danceMoves;
+    },
+    
+    getDanceScheduleElements() {
+        const groupContainer = document.getElementsByClassName('group-container')[0];
+
+        let result;
+        
+        if (app.listOfGroups.length) {
+            app.listOfGroups.forEach((group, index) => {
+                const tr = document.createElement('tr');
+                tr.id = index;
+                const tdGroup = this.createTdElement(group, 'group');
+                const dates = this.getNextWeekend();
+                const tdDate = this.createTdElement(dates[0], 'date');
+                const tdUlContainer = document.createElement('td');
+                const ul = document.createElement('ul');
+                ul.className = 'selected-dance-moves-list';
+                tdUlContainer.appendChild(ul);
+                const tdSelectContainer = document.createElement('td');
+                const select = document.createElement('select');
+                select.id = 'select-moves-for-today';
+                select.addEventListener('change', handlers.getSelectedDanceMoves.bind(handlers));
+                tdSelectContainer.appendChild(select);
+                handlers.selectDanceMoves(select);
+                // razdvoj html, on page load se ne prikazuje lista danceMove-a za taj dan... showSelectedDanceMoves je ver problem
+                tr.appendChild(tdGroup);
+                tr.appendChild(tdDate);
+                tr.appendChild(select);
+                tr.appendChild(ul);
+                result = tr;
+                try {
+                    if (app.listOfDanceSchedules[index].danceMoves.length) {
+                        this.showSelectedDanceMoves(ul);
+                    }   
+                } catch(error) {
+                    console.log(error);
+                }
+                groupContainer.appendChild(result);   
+            });        
+        }
+        
+    },
+    
+    populateDanceScheduleElements() {
+          
     },
     
     populateDanceListUlElements(danceListUl) {
@@ -79,8 +222,8 @@ const handlers = {
         this.populateDanceListUlElements(danceListUl);
     },
     
-    selectDanceMoves() {
-        const selectElement = document.getElementById('select-moves-for-today');
+    selectDanceMoves(el) {
+        const selectElement = el;
         selectElement.innerHTML = '';
         const danceMoves = app.danceList;
         danceMoves.forEach(danceMove => {
@@ -88,11 +231,11 @@ const handlers = {
             selectElement.appendChild(optionElement);
         });
     },
-    getSelectedDanceMoves() {
-        const danceMoveIndex = document.getElementById('select-moves-for-today').selectedIndex;
+    getSelectedDanceMoves(event) {
+        const danceMoveIndex = Number(event.target.selectedIndex);
         const danceMoves = app.danceList[danceMoveIndex];
-        const group = document.getElementsByClassName('group-shower')[0].textContent;
-        const date = document.getElementsByClassName('date-shower')[0].textContent;
+        const group = event.target.parentElement.querySelector('td.group').textContent;
+        const date = event.target.parentElement.querySelector('td.date').textContent;
         
         const danceSchedule = this.createDanceSchedule(group, date, danceMoves);
         const isDanceScheduleCreated = this.isDanceScheduleCreated(danceSchedule);
@@ -100,7 +243,7 @@ const handlers = {
         this.addDanceSchedule(isDanceScheduleCreated, danceSchedule, danceMoves); // pogresno postavljeno
         
         appStorage.listOfDanceSchedules.setListOfDanceSchedules();
-        this.showSelectedDanceMoves();
+        this.showSelectedDanceMoves(event);
     },
     
     addDanceSchedule(isDanceScheduleCreated, danceSchedule, danceMoves) {
@@ -163,9 +306,9 @@ const handlers = {
             } 
         });
     },
-    
-    showSelectedDanceMoves() {
-        const ul = document.getElementsByClassName('dance-list-display-group-1')[0];
+
+    showSelectedDanceMoves(event) {
+        const ul = event || event.target.parentElement.querySelector('.selected-dance-moves-list') || event.target.parentElement.parentElement;
         ul.innerHTML = ''; 
         this.populateSelectedDanceMoves(ul);
     },
@@ -179,6 +322,7 @@ const handlers = {
                     const index = element.textContent.indexOf(input.value.charAt(input.value.length - 1));
                     const letter = element.textContent.charAt(index);
                     element.textContent.replace(letter, `<span style="color: red;">${letter}</span>`);
+                    // replace vraca novi string
                 } 
             });
         }
@@ -186,31 +330,22 @@ const handlers = {
     
     deleteSelectedMove(event) {
         const moveIndex = Number(event.target.parentElement.id);
-        const groupName = handlers.getGroupName(event.target.parentElement.parentElement.className);
+        console.log(event.target.parentElement.parentElement);
+        const groupName = event.target.parentElement.parentElement.parentElement.parentElement.querySelector('.group').textContent;
         const group = handlers.getGroup(groupName);
         group.danceMoves.splice(moveIndex, 1);
         appStorage.listOfDanceSchedules.setListOfDanceSchedules();
-        handlers.showSelectedDanceMoves();
+        handlers.showSelectedDanceMoves(event);
     },
     
     getGroup(groupName) { 
         let result;
         app.listOfDanceSchedules.filter(list => {
             if (list.group.includes(groupName)) {
-                result = list; // filter
+                result = list;
             }
         });
         return result;
-    },
-    
-    getGroupName(className) {
-        if (className.includes(1)) {
-            return '1';
-        } else if (className.includes(2)) {
-            return '2';
-        } else {
-            return '3';
-        }
     },
     
     createDanceMoveLi(danceMove, index) {
@@ -255,9 +390,11 @@ const handlers = {
     getNamesOfMembers() {
         const selectElement = document.getElementById('list-of-members');
         selectElement.innerHTML = '';
-        app.listOfPeople.forEach(person => {    
-            const optionElement = this.createOptionElement(person.name);
-            selectElement.appendChild(optionElement);
+        app.listOfPeople.forEach(person => {
+            if (!person.isDisabled) {
+                const optionElement = this.createOptionElement(person.name);
+                selectElement.appendChild(optionElement);   
+            }
         });  
     },
     
@@ -326,12 +463,16 @@ const handlers = {
         table.innerHTML = '';
         const list = app.listOfPeople;
         list.forEach(person => {
-            const tr = this.createTrElement();
-            for (const prop in person) {
-                const td = this.createTdElement(person[prop]);
-                tr.appendChild(td);
+            if (!person.isDisabled) {
+                const tr = this.createTrElement();
+                for (const prop in person) {
+                    if (prop !== 'id' && prop !== 'isDisabled') {
+                        const td = this.createTdElement(person[prop]);
+                        tr.appendChild(td);   
+                    }
+                }
+                table.appendChild(tr);   
             }
-            table.appendChild(tr);
         });
     },
     
@@ -367,8 +508,8 @@ const handlers = {
     },
     
     getNewMemberGroup() {
-        const group = document.getElementById('group').value;
-        document.getElementById('group').value = ''; 
+        const group = document.getElementById('group-selector').value;
+        document.getElementById('group-selector').value = ''; 
         return group;
     },
     
@@ -390,14 +531,16 @@ const handlers = {
     getNextWeekend(day='') {
         const todaysDate = day || new Date();
         const todaysIndex = todaysDate.getDay();
+        let result = null;
         
-        if (todaysIndex === 6) { // func 
-            this.storeWeekend(todaysDate); // ??
+        if (todaysIndex === 6 && !result) { 
+            result = this.storeWeekend(todaysDate);
         } else {
             const nextDay = todaysDate.setDate(todaysDate.getDate() + 1);
             const day = new Date(nextDay);
-            this.getNextWeekend(day);
+            result = this.getNextWeekend(day);
         }
+        return result;
     },
     
     storeWeekend(todaysDate) {
@@ -405,9 +548,13 @@ const handlers = {
         const saturday = todaysDate.toLocaleDateString();
         const sunday = new Date(todaysDate.setDate(todaysDate.getDate() + 1)).toLocaleDateString();
         weekend.push(saturday, sunday);
-        document.getElementsByClassName('saturday-display')[0].textContent = weekend[0];
-        document.getElementsByClassName('sunday-display')[0].textContent = weekend[1];
         return weekend;    
+    },
+    
+    getDates() {
+        const weekend = this.getNextWeekend();
+        document.querySelector('.saturday-display').textContent = weekend[0];
+        document.querySelector('.sunday-display').textContent = weekend[1];
     },
     
     createProfileContainer(className) {
@@ -465,6 +612,12 @@ const handlers = {
         return ul;
     },
     
+    disablePersonFromListOfPeople(event) {
+        const index = event.target.id;
+        app.listOfPeople[index].isDisabled = true;
+        appStorage.listOfPeople.setListOfPeople();
+    },
+    
     createProfileDanceList(danceList) {
         const ul = document.createElement('ul');
         danceList.forEach(element => {
@@ -484,29 +637,87 @@ const handlers = {
         const recommendation = this.createProfileRecommendation(person, 'recommendation-shower');
         const attendenceHistory = this.getProfileAttendenceHistory(person.name);
         const danceList = this.createProfileDanceList(person.danceList);
+        const disableButton = this.createProfileDisableButton(person);
         article.appendChild(heading);
         article.appendChild(startDate);
         article.appendChild(group);
         article.appendChild(recommendation);
         article.appendChild(attendenceHistory);
         article.appendChild(danceList); 
+        article.appendChild(disableButton); 
         return article;
+    },
+    
+    createProfileDisableButton(person) {
+        const button = document.createElement('button');
+        button.textContent = 'Disable';
+        button.id = person.id;
+        button.addEventListener('click', handlers.disablePersonFromListOfPeople);
+        return button;
+    },
+    
+    getDisabledListOfPeople() {
+        let result = [];
+        app.listOfPeople.filter(person => {
+            if (person.isDisabled) {
+                result.push(person.name);
+            }
+        });
+        return result;
+    },
+    
+    restorePerson() {
+        const nameOfThePerson = event.target.dataset.text;
+        app.listOfPeople.forEach(person => {
+            if (person.name === nameOfThePerson) {
+                person.isDisabled = false;
+            } 
+        });
+        appStorage.listOfPeople.setListOfPeople();
+    },
+    
+    createRestorePersonButton(nameOfThePerson) {
+        const button = document.createElement('button');
+        button.textContent = 'Restore';
+        button.dataset.text = nameOfThePerson;
+        button.addEventListener('click', handlers.restorePerson);
+        return button;
+    },
+    
+    createDisabledListOfPeople() {
+        const disabledList = this.getDisabledListOfPeople();
+        
+        if (disabledList) {
+            const ul = document.createElement('ul');
+            ul.innerHTML = '';        
+            disabledList.forEach(nameOfThePerson => {
+                const li = document.createElement('li');
+                li.textContent = nameOfThePerson;
+                const button = this.createRestorePersonButton(nameOfThePerson);
+                li.appendChild(button);
+                ul.appendChild(li);
+            });  
+            document.querySelector('.profile').appendChild(ul);
+        }
     },
         
     createProfile() {
         const list = app.listOfPeople;
         const profile = document.getElementsByClassName('profile')[0];
+        
         list.forEach(person => {
-            const article = this.populateProfileConteinerElements(person);
-            profile.appendChild(article);
+            if (!person.isDisabled) {
+                const article = this.populateProfileConteinerElements(person);
+                profile.appendChild(article);   
+            }
         });
     },
     
-    createCheckbox(date, name) {
+    createCheckbox(date, name, method) {
         const checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('data-text', date);
-        checkbox.addEventListener('change', handlers.checkAttendenceCheckbox);
+        checkbox.addEventListener('change', method);
         checkbox.checked = this.isPersonOnAttendenceList(date, name);
         return checkbox;
     },
@@ -641,8 +852,8 @@ const handlers = {
     displayAttendenceList() {
         const table = document.getElementsByClassName('attendence-people-list')[0];
         table.innerHTML = '';
-        const saturdaysDate = document.getElementsByClassName('saturday-display')[0].textContent;
-        const sundaysDate = document.getElementsByClassName('sunday-display')[0].textContent;
+        const saturdaysDate = this.getNextWeekend()[0];
+        const sundaysDate = this.getNextWeekend()[1];
         this.populateAttendenceList(table, saturdaysDate, sundaysDate);
     },
     
@@ -650,8 +861,8 @@ const handlers = {
         const tr = this.createTrElement();
         const tdName = this.createTdElement(person.name, 'person-name');
         const tdGroup = this.createTdElement(person.group, 'person-group');
-        const tdCheckboxSaturday = this.createCheckbox(saturdaysDate, person.name);
-        const tdCheckboxSunday = this.createCheckbox(sundaysDate, person.name);
+        const tdCheckboxSaturday = this.createCheckbox(saturdaysDate, person.name, handlers.checkAttendenceCheckbox);
+        const tdCheckboxSunday = this.createCheckbox(sundaysDate, person.name, handlers.checkAttendenceCheckbox);
         tr.appendChild(tdName);
         tr.appendChild(tdCheckboxSaturday);
         tr.appendChild(tdCheckboxSunday);
@@ -662,7 +873,9 @@ const handlers = {
     populateAttendenceList(table, saturdaysDate, sundaysDate) {
         const list = app.listOfPeople;
         list.forEach(person => {
-            this.populatePersonOnAttendenceList(person, table, saturdaysDate, sundaysDate);
+            if (!person.isDisabled) {
+                this.populatePersonOnAttendenceList(person, table, saturdaysDate, sundaysDate);
+            }
         });   
     },
     
@@ -733,14 +946,118 @@ const handlers = {
         return result;
     },
     
-    createDanceScheduleId() {
-        const list = app.listOfDanceSchedules;
-        result = list ? list.length : 0;
+    populatePaymentListMonthShower() {
+        document.getElementsByClassName('month-shower')[0].textContent = this.getCurrentMonth();
+    },
+    
+    displayPaymentList() {
+        const table = document.getElementsByClassName('payment-people-list')[0];
+        const month = this.getCurrentMonth();
+        table.innerHTML = '';
+        this.populatePaymentList(table, month);
+    },
+    
+    checkIfPersonHasBeenAddedToPaymentList() {
+        const namesOfPeople = []; 
+        app.listOfPeople.filter(person => namesOfPeople.push(person.name));
+        
+        let result = false;
+        if (app.paymentList.length) {
+            app.paymentList.forEach(per => {
+                if (namesOfPeople.includes(per.name)) {
+                    result = true;
+                }
+            });
+        }
+        
         return result;
+    },
+    
+    togglePersonPayment(event) {
+        if (event.target.checked) {
+            const nameOfThePerson = event.target.previousSibling.textContent;
+            const month = event.target.dataset.text;
+            app.paymentList.forEach(person => {
+                if (person.name === nameOfThePerson) {
+                    person.paymentList.forEach(monthEl => {
+                        if (monthEl.month === month) {
+                            monthEl.isPaid = !monthEl.isPaid;
+                        } 
+                    });
+                } 
+            });
+        }
+        
+        appStorage.paymentList.setPaymentList();
+        handlers.displayPaymentList();
+    },
+    
+    hasThePersonPaidForTheMonth(month, nameOfThePerson) {
+        const list = app.paymentList;
+        let result = false;
+        
+        list.forEach(element => {
+            if (element.name === nameOfThePerson) {
+                element.paymentList.forEach(el => {
+                    if (el.month === month) {
+                        result = el.isPaid;
+                    }
+                });   
+            }
+        });
+        
+        return result;
+    },
+    
+    addPeopleToPaymentList() {   
+        const hasBeenAddedToPaymentList = this.checkIfPersonHasBeenAddedToPaymentList();
+
+        app.listOfPeople.forEach(person => {
+            const personOnPaymentList = this.createEachPersonOnPaymentList(person.name);            
+            if (app.paymentList.length && !hasBeenAddedToPaymentList) {
+                app.paymentList.push(personOnPaymentList);
+            }
+        });
+        
+        appStorage.paymentList.setPaymentList();
+        this.displayPaymentList();
+    },
+    
+    populatePersonOnPaymentList(person, table, month) {
+        const tr = this.createTrElement();
+        const tdName = this.createTdElement(person.name, 'person-name');
+        const tdCheckboxMonth = this.createCheckbox(month, person.name, handlers.togglePersonPayment);
+        tdCheckboxMonth.checked = this.hasThePersonPaidForTheMonth(month, person.name);
+        tr.appendChild(tdName);
+        tr.appendChild(tdCheckboxMonth);
+        table.appendChild(tr);  
+    },
+    
+    populatePaymentList(table, month) {
+        const list = app.paymentList;
+        list.forEach(person => {
+            if (!person.isDisabled) {
+                this.populatePersonOnPaymentList(person, table, month);
+            }
+        });   
+    },
+    
+    createEachPersonOnPaymentList(name) { 
+        const month = this.getCurrentMonth();
+        function CreatePaymentListPerson(name, month) {
+            this.name = name;
+            this.paymentList = [{month, isPaid: false}];
+        }
+        
+        return new CreatePaymentListPerson(name, month);
+    },
+        
+    createListId(list) {
+        return list ? list.length : 0;
     },
         
     createDanceSchedule(group, date, danceMoves) {
-        const id = this.createDanceScheduleId();
+        const id = this.createListId(app.listOfDanceSchedules);
         function CreateDanceSchedule(group, date, danceMoves, id) {
             this.group = group;
             this.date = date; 
@@ -752,15 +1069,18 @@ const handlers = {
     },
     
     createNewMember(name, recommendedBy, startDate, group) {
-        function Member(name, recommendedBy, startDate, group) {
+        const id = this.createListId(app.listOfPeople);
+        function Member(name, recommendedBy, startDate, group, id) {
             this.name = name;
             this.recommendedBy = recommendedBy;
             this.startDate = startDate;
             this.group = group;
             this.danceList = [];
+            this.id = id;
+            this.isDisabled = false;
         }
         
-        return new Member(name, recommendedBy, startDate, group);
+        return new Member(name, recommendedBy, startDate, group, id);
     },
     
     createAttendenceList(date) {
@@ -778,5 +1098,7 @@ const app = {
     listOfPeople: appStorage.listOfPeople.getListOfPeople() || [],
     danceList: appStorage.danceList.getDanceList() || [],
     listOfDanceSchedules: appStorage.listOfDanceSchedules.getListOfDanceSchedules() || [],
-    attendanceList: appStorage.attendanceList.getAttendanceList() || []
+    attendanceList: appStorage.attendanceList.getAttendanceList() || [],
+    listOfGroups: appStorage.groups.getGroupList() || [],
+    paymentList: appStorage.paymentList.getPaymentList() || []
 };
