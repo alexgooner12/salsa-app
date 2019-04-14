@@ -118,6 +118,7 @@ const handlers = {
     
     populateGroupList() {
         const ul = document.createElement('ul');
+
         app.listOfGroups.forEach((group, index) => {
             const li = document.createElement('li');
             li.textContent = group;
@@ -161,6 +162,38 @@ const handlers = {
         return danceMoves;
     },
     
+    generateTdUlContainer () {
+        const ul = this.createUlElement('selected-dance-moves-list');
+        const tdUlContainer = document.createElement('td');
+        tdUlContainer.appendChild(ul);
+        return tdUlContainer;
+    },
+    
+    generateTdSelectContainer (index) {
+        const tdSelectContainer = document.createElement('td');
+        tdSelectContainer.id = index;
+        const select = this.createSelectElement('select-moves-for-today',
+                handlers.addDanceSchedule.bind(handlers));
+        tdSelectContainer.appendChild(select);
+        handlers.createOptionElementForEachDanceMove(select);
+        return tdSelectContainer;
+    },
+    
+    generateTrChildren(group, index) {
+        return [
+            this.createTdElement(group, 'group'),
+            this.createTdElement(this.getNextWeekend()[0], 'date'),
+            this.generateTdSelectContainer(index),
+            this.generateTdUlContainer(),
+        ];
+    },
+    
+    appendChildren (parent, children) {
+        children.forEach(child => {
+            parent.appendChild(child);
+        });
+    },
+    
     getDanceScheduleElements() {
         const groupContainer = document.getElementsByClassName('group-container')[0];
 
@@ -168,42 +201,15 @@ const handlers = {
         
         if (app.listOfGroups.length) {
             app.listOfGroups.forEach((group, index) => {
-                const tr = document.createElement('tr');
-                tr.id = index;
-                const tdGroup = this.createTdElement(group, 'group');
-                const dates = this.getNextWeekend();
-                const tdDate = this.createTdElement(dates[0], 'date');
-                const tdUlContainer = document.createElement('td');
-                const ul = document.createElement('ul');
-                ul.className = 'selected-dance-moves-list';
-                tdUlContainer.appendChild(ul);
-                const tdSelectContainer = document.createElement('td');
-                const select = document.createElement('select');
-                select.id = 'select-moves-for-today';
-                select.addEventListener('change', handlers.getSelectedDanceMoves.bind(handlers));
-                tdSelectContainer.appendChild(select);
-                handlers.selectDanceMoves(select);
-                // razdvoj html, on page load se ne prikazuje lista danceMove-a za taj dan... showSelectedDanceMoves je ver problem
-                tr.appendChild(tdGroup);
-                tr.appendChild(tdDate);
-                tr.appendChild(select);
-                tr.appendChild(ul);
+                const tr = this.createTrElement(index);
+                this.appendChildren(groupContainer, [this.createThElement('Group'), this.createThElement('Date'), this.createThElement('Choose a dance move')]);
+                this.appendChildren(tr, this.generateTrChildren(group, index));
                 result = tr;
-                try {
-                    if (app.listOfDanceSchedules[index].danceMoves.length) {
-                        this.showSelectedDanceMoves(ul);
-                    }   
-                } catch(error) {
-                    console.log(error);
-                }
                 groupContainer.appendChild(result);   
+                this.showSelectedDanceMoves(this.generateTdUlContainer().childNodes[0], index, group);
             });        
         }
         
-    },
-    
-    populateDanceScheduleElements() {
-          
     },
     
     populateDanceListUlElements(danceListUl) {
@@ -222,7 +228,7 @@ const handlers = {
         this.populateDanceListUlElements(danceListUl);
     },
     
-    selectDanceMoves(el) {
+    createOptionElementForEachDanceMove(el) {
         const selectElement = el;
         selectElement.innerHTML = '';
         const danceMoves = app.danceList;
@@ -231,30 +237,35 @@ const handlers = {
             selectElement.appendChild(optionElement);
         });
     },
+    
     getSelectedDanceMoves(event) {
         const danceMoveIndex = Number(event.target.selectedIndex);
-        const danceMoves = app.danceList[danceMoveIndex];
-        const group = event.target.parentElement.querySelector('td.group').textContent;
-        const date = event.target.parentElement.querySelector('td.date').textContent;
-        
-        const danceSchedule = this.createDanceSchedule(group, date, danceMoves);
-        const isDanceScheduleCreated = this.isDanceScheduleCreated(danceSchedule);
-        
-        this.addDanceSchedule(isDanceScheduleCreated, danceSchedule, danceMoves); // pogresno postavljeno
-        
-        appStorage.listOfDanceSchedules.setListOfDanceSchedules();
-        this.showSelectedDanceMoves(event);
+        return app.danceList[danceMoveIndex];
+    },
+
+    getDanceScheduleValues(event) {
+        const danceMoves = this.getSelectedDanceMoves(event);
+        const group = event.target.parentElement.parentElement.querySelector('td.group').textContent;
+        const date = event.target.parentElement.parentElement.querySelector('td.date').textContent;    
+        return { danceMoves, group, date };
     },
     
-    addDanceSchedule(isDanceScheduleCreated, danceSchedule, danceMoves) {
-        if (isDanceScheduleCreated)  { 
-            const danceScheduleListOfMoves = this.getDanceScheduleListOfMoves(danceSchedule);
-            const hasDanceMoveBeenAdded = this.checkIfDanceMoveHasBeenAdded(danceScheduleListOfMoves, danceMoves);
-            if (!hasDanceMoveBeenAdded) {
-                danceScheduleListOfMoves.push(danceMoves); 
-            }
-        } else {
-            app.listOfDanceSchedules.push(danceSchedule);
+    addDanceSchedule(event) {
+        const danceScheduleValues = this.getDanceScheduleValues(event);
+        const danceSchedule = this.createDanceSchedule(danceScheduleValues.group, danceScheduleValues.date, danceScheduleValues.danceMoves);
+        const isDanceScheduleCreated = this.isDanceScheduleCreated(danceSchedule);
+        
+        isDanceScheduleCreated ? this.editDanceSchedule(danceSchedule, danceScheduleValues) :             app.listOfDanceSchedules.push(danceSchedule);
+
+        appStorage.listOfDanceSchedules.setListOfDanceSchedules();
+        this.showSelectedDanceMoves(event, event.target.parentElement.id, danceScheduleValues.group);
+    },
+    
+    editDanceSchedule(danceSchedule, danceScheduleValues) {
+        const danceScheduleListOfMoves = this.getDanceScheduleListOfMoves(danceSchedule);
+        const hasDanceMoveBeenAdded = this.checkIfDanceMoveHasBeenAdded(danceScheduleListOfMoves, danceScheduleValues.danceMoves);
+        if (!hasDanceMoveBeenAdded) {
+            danceScheduleListOfMoves.push(danceScheduleValues.danceMoves); 
         } 
     },
     
@@ -283,23 +294,23 @@ const handlers = {
     
     isDanceScheduleCreated(danceSchedule) { 
         const listOfDanceSchedules = app.listOfDanceSchedules;
-        let result;
+        let result = false;
+        
         listOfDanceSchedules.forEach((dance, index) => {
             if (listOfDanceSchedules[index].group === danceSchedule.group && listOfDanceSchedules[index].date === danceSchedule.date) {
                 result = true;
-            } else {
-                result = false;
             }
         });
         return result;
     },
     
-    populateSelectedDanceMoves(ul) {
+    populateSelectedDanceMoves(ul, group) {
         app.listOfDanceSchedules.forEach(list => {
-            if (list.danceMoves.length) {
+            if (list.danceMoves.length && list.group === group) {
                 list.danceMoves.forEach((item, index) => {
                     const li = this.createDanceMoveLi(item, index);
-                    const deleteButton = this.createDeleteDanceMoveButton('delete-selected-move', handlers.deleteSelectedMove);
+                    const deleteButton = this.createDeleteDanceMoveButton('delete-selected-move', handlers.deleteSelectedMove, list.id);
+                    deleteButton.dataset.text = group;
                     li.appendChild(deleteButton);
                     ul.appendChild(li);
                 });
@@ -307,10 +318,11 @@ const handlers = {
         });
     },
 
-    showSelectedDanceMoves(event) {
-        const ul = event || event.target.parentElement.querySelector('.selected-dance-moves-list') || event.target.parentElement.parentElement;
+    showSelectedDanceMoves(event, index, group) {
+        const el = document.querySelectorAll('ul.selected-dance-moves-list');
+        const ul = el[index] || event;
         ul.innerHTML = ''; 
-        this.populateSelectedDanceMoves(ul);
+        this.populateSelectedDanceMoves(ul, group);
     },
     
     filterThruDanceList() {
@@ -319,10 +331,8 @@ const handlers = {
         if (ul) {
             ul.forEach(element => {
                 if (element.textContent.startsWith(input.value)) {
-                    const index = element.textContent.indexOf(input.value.charAt(input.value.length - 1));
-                    const letter = element.textContent.charAt(index);
-                    element.textContent.replace(letter, `<span style="color: red;">${letter}</span>`);
-                    // replace vraca novi string
+                    const letters = element.textContent.match(input.value).toString();
+                    element.innerHTML = element.textContent.replace(letters, `<span style="color: yellow; font-size: 150%; font-weight:bold;">${letters}</span>`);
                 } 
             });
         }
@@ -330,12 +340,11 @@ const handlers = {
     
     deleteSelectedMove(event) {
         const moveIndex = Number(event.target.parentElement.id);
-        console.log(event.target.parentElement.parentElement);
-        const groupName = event.target.parentElement.parentElement.parentElement.parentElement.querySelector('.group').textContent;
+        const groupName = event.target.dataset.text;
         const group = handlers.getGroup(groupName);
         group.danceMoves.splice(moveIndex, 1);
         appStorage.listOfDanceSchedules.setListOfDanceSchedules();
-        handlers.showSelectedDanceMoves(event);
+        handlers.showSelectedDanceMoves(event.target.parentElement.parentElement, event.target.id, groupName);
     },
     
     getGroup(groupName) { 
@@ -355,10 +364,11 @@ const handlers = {
         return li;
     },
     
-    createDeleteDanceMoveButton(className, method) {
+    createDeleteDanceMoveButton(className, method, id) {
         const button = document.createElement('button');
         const icon = document.createTextNode('x');
         button.className = className;
+        button.id = id;
         button.appendChild(icon);
         button.addEventListener('click', method);
         return button;
@@ -376,17 +386,7 @@ const handlers = {
         appStorage.danceList.setDanceList();
         this.showDanceMoves();   
     },
-    
-    getMemberName(event) {
-        return event.target.value;  
-    },
-    
-    checkGetMemberName(event) {
-        if (event.target.className.includes('member-name-input')) {
-            this.getMemberName(event);
-        }  
-    },
-    
+
     getNamesOfMembers() {
         const selectElement = document.getElementById('list-of-members');
         selectElement.innerHTML = '';
@@ -430,6 +430,7 @@ const handlers = {
         this.displayPeople();
     },
     
+    
     sortPeopleListByDate() {
         const list = app.listOfPeople;
         list.sort((a, b) => { 
@@ -466,7 +467,7 @@ const handlers = {
             if (!person.isDisabled) {
                 const tr = this.createTrElement();
                 for (const prop in person) {
-                    if (prop !== 'id' && prop !== 'isDisabled') {
+                    if (prop !== 'id' && prop !== 'isDisabled' && prop !== 'danceList') {
                         const td = this.createTdElement(person[prop]);
                         tr.appendChild(td);   
                     }
@@ -476,8 +477,9 @@ const handlers = {
         });
     },
     
-    createTrElement() {
+    createTrElement(id='') {
         const tr = document.createElement('tr');
+        tr.id = id;
         return tr;
     },
     
@@ -486,6 +488,13 @@ const handlers = {
         td.textContent = person;
         td.classList.add(className);
         return td;
+    },
+    
+    createThElement(text, className) {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.className = className;
+        return th;
     },
     
     getNewMemberName() {
@@ -501,10 +510,10 @@ const handlers = {
     },
     
     getNewMemberRecommendation() {
-        const recommendedBy = document.getElementById('recommended-input').value || document.getElementById('list-of-members').value;
+        const findOutFrom = document.getElementById('find-out-from-input').value || document.getElementById('list-of-members').value;
         document.getElementById('list-of-members').value = '';
-        document.getElementById('recommended-input').value = '';
-        return recommendedBy;
+        document.getElementById('find-out-from-input').value = '';
+        return findOutFrom;
     },
     
     getNewMemberGroup() {
@@ -516,9 +525,9 @@ const handlers = {
     getNewMemberInfo() {
         const name = this.getNewMemberName();
         const startDate = this.getNewMemberStartDate();
-        const recommendedBy = this.getNewMemberRecommendation();
+        const findOutFrom = this.getNewMemberRecommendation();
         const group = this.getNewMemberGroup();
-        return [name, recommendedBy, startDate, group]; // has to be in the correct order !
+        return [name, findOutFrom, startDate, group]; // has to be in the correct order !
     },
     
     addNewMember() {
@@ -526,6 +535,11 @@ const handlers = {
         const newMember = this.createNewMember(...newMemberInfo);  
         app.listOfPeople.push(newMember);
         appStorage.listOfPeople.setListOfPeople();
+    },
+    
+    initNewMemberPage() {
+        this.getNamesOfMembers();
+        this.getNamesOfGroups();
     },
 
     getNextWeekend(day='') {
@@ -557,6 +571,25 @@ const handlers = {
         document.querySelector('.sunday-display').textContent = weekend[1];
     },
     
+    initProfilePage() {
+        this.createProfile();
+        this.createDisabledListOfPeople(); 
+    },
+    
+    createUlElement(className) {
+        const ul = document.createElement('ul');
+        ul.className = className;
+        return ul;
+    },
+    
+    createSelectElement(id, method) {
+        const select = document.createElement('select');
+        select.id = 'select-moves-for-today';
+        select.addEventListener('change', method);
+        return select;
+    },
+    
+    
     createProfileContainer(className) {
         const article = document.createElement('article');
         article.classList.add(className);
@@ -572,21 +605,21 @@ const handlers = {
     
     createProfileStartDate(person, className) {
         const label = document.createElement('label');
-        label.textContent = person.date;
+        label.textContent = `Joined Aqua on ${person.startDate}`;
         label.classList.add(className);
         return label;
     },
     
     createProfileGroup(person, className) {
         const label = document.createElement('label');
-        label.textContent = person.group;
+        label.textContent = `Member of ${person.group}`;
         label.classList.add(className);
         return label;
     },
     
     createProfileRecommendation(person, className) {
         const label = document.createElement('label');
-        label.textContent = person.recommendedBy;
+        label.textContent = `Found out from ${person.findOutFrom}`;
         label.classList.add(className);
         return label;
     },
@@ -607,7 +640,7 @@ const handlers = {
     getProfileAttendenceHistory(name) {
         const ul = document.createElement('ul');
         ul.innerHTML = '';
-        
+        ul.textContent = 'Has been present on these dates';
         this.populateProfileAttendenceHistory(ul, name);
         return ul;
     },
@@ -620,6 +653,7 @@ const handlers = {
     
     createProfileDanceList(danceList) {
         const ul = document.createElement('ul');
+        ul.textContent = 'Familiar dance moves';
         danceList.forEach(element => {
             const li = document.createElement('li');
             li.textContent = element;
@@ -631,20 +665,7 @@ const handlers = {
     
     populateProfileConteinerElements(person) {
         const article = this.createProfileContainer('person-shower');
-        const heading = this.createProfileHeading(person, 'name-shower');
-        const startDate = this.createProfileStartDate(person, 'start-date-shower');
-        const group = this.createProfileGroup(person, 'group-shower');
-        const recommendation = this.createProfileRecommendation(person, 'recommendation-shower');
-        const attendenceHistory = this.getProfileAttendenceHistory(person.name);
-        const danceList = this.createProfileDanceList(person.danceList);
-        const disableButton = this.createProfileDisableButton(person);
-        article.appendChild(heading);
-        article.appendChild(startDate);
-        article.appendChild(group);
-        article.appendChild(recommendation);
-        article.appendChild(attendenceHistory);
-        article.appendChild(danceList); 
-        article.appendChild(disableButton); 
+        this.appendChildren(article, [this.createProfileHeading(person, 'name-shower'),                                                             this.createProfileStartDate(person, 'start-date-shower'),                                                     this.createProfileGroup(person, 'group-shower'),                                                               this.createProfileRecommendation(person, 'find-out-from-shower'),                                             this.getProfileAttendenceHistory(person.name),                                                                 this.createProfileDanceList(person.danceList),                                                                 this.createProfileDisableButton(person)])
         return article;
     },
     
@@ -702,10 +723,10 @@ const handlers = {
     },
         
     createProfile() {
-        const list = app.listOfPeople;
         const profile = document.getElementsByClassName('profile')[0];
+        profile.innerHTML = '';
         
-        list.forEach(person => {
+        app.listOfPeople.forEach(person => {
             if (!person.isDisabled) {
                 const article = this.populateProfileConteinerElements(person);
                 profile.appendChild(article);   
@@ -722,7 +743,18 @@ const handlers = {
         return checkbox;
     },
     
-    determineIfAttendenceListHasBeenCreated(date = '3/2/2019') {
+    getNextClassDate() {
+        const currentDate = new Date().toLocaleDateString();
+        const weekend = this.getNextWeekend();
+        if (weekend[1] === currentDate) {
+            return weekend[1];
+        } else {
+            return weekend[0];
+        }
+        
+    },
+    
+    determineIfAttendenceListHasBeenCreated(date = '3/9/2019') {
         let result = false;
         app.attendanceList.forEach(list => {
             (list.date === date) ? result = true : false;  
@@ -731,7 +763,7 @@ const handlers = {
     },
      
     checkAttendenceList(date) {
-        const hasBeenCreated = this.determineIfAttendenceListHasBeenCreated();
+        const hasBeenCreated = this.determineIfAttendenceListHasBeenCreated(date);
         hasBeenCreated ? '' : this.addAttendenceList(date);  
     },
     
@@ -849,24 +881,28 @@ const handlers = {
         return danceMoves;
     },
     
+    initAttendencePage() {
+        this.getNextWeekend();
+        this.displayAttendenceList();
+        this.checkAttendenceList(this.getNextClassDate());
+        this.getDates();
+    },
+    
     displayAttendenceList() {
-        const table = document.getElementsByClassName('attendence-people-list')[0];
-        table.innerHTML = '';
-        const saturdaysDate = this.getNextWeekend()[0];
-        const sundaysDate = this.getNextWeekend()[1];
-        this.populateAttendenceList(table, saturdaysDate, sundaysDate);
+        if (app.listOfDanceSchedules.length) {
+            const table = document.getElementsByClassName('attendence-people-list')[0];
+            table.innerHTML = '';
+            const saturdaysDate = this.getNextWeekend()[0];
+            const sundaysDate = this.getNextWeekend()[1];
+            this.populateAttendenceList(table, saturdaysDate, sundaysDate);   
+        } else {
+            alert('Create a dance schedule first');
+        }
     },
     
     populatePersonOnAttendenceList(person, table, saturdaysDate, sundaysDate) {
         const tr = this.createTrElement();
-        const tdName = this.createTdElement(person.name, 'person-name');
-        const tdGroup = this.createTdElement(person.group, 'person-group');
-        const tdCheckboxSaturday = this.createCheckbox(saturdaysDate, person.name, handlers.checkAttendenceCheckbox);
-        const tdCheckboxSunday = this.createCheckbox(sundaysDate, person.name, handlers.checkAttendenceCheckbox);
-        tr.appendChild(tdName);
-        tr.appendChild(tdCheckboxSaturday);
-        tr.appendChild(tdCheckboxSunday);
-        tr.appendChild(tdGroup); 
+        this.appendChildren(tr, [this.createTdElement(person.name, 'person-name'),                                                              this.createTdElement(person.group, 'person-group'),                                                            this.createCheckbox(saturdaysDate, person.name, handlers.checkAttendenceCheckbox),                            this.createCheckbox(sundaysDate, person.name, handlers.checkAttendenceCheckbox)]);
         table.appendChild(tr);  
     },
     
@@ -917,8 +953,7 @@ const handlers = {
     getNamesOfPeopleWhoHaveAttended() {
         const listOfDanceSchedules = app.listOfDanceSchedules;
         const attendenceList = app.attendanceList;
-        const namesOfPeopleWhoHaveAttended = this.determineNamesOfPeopleWhoHaveAttenedResult(listOfDanceSchedules, attendenceList);
-        return namesOfPeopleWhoHaveAttended;
+        return this.determineNamesOfPeopleWhoHaveAttenedResult(listOfDanceSchedules, attendenceList);
     },
     
     addDanceMovesToPerson(danceMoves= 'relo') {
@@ -957,6 +992,11 @@ const handlers = {
         this.populatePaymentList(table, month);
     },
     
+    initPaymentListPage() {
+        this.populatePaymentListMonthShower();
+        this.addPeopleToPaymentList();
+    },
+    
     checkIfPersonHasBeenAddedToPaymentList() {
         const namesOfPeople = []; 
         app.listOfPeople.filter(person => namesOfPeople.push(person.name));
@@ -973,21 +1013,22 @@ const handlers = {
         return result;
     },
     
+    findPersonOnPaymentList(month, name) {
+        app.paymentList.forEach(person => {
+            if (person.name === name) {
+                person.paymentList.forEach(monthEl => {
+                    if (monthEl.month === month) {
+                        monthEl.isPaid = !monthEl.isPaid;
+                    } 
+                });
+            } 
+        });  
+    },
+    
     togglePersonPayment(event) {
-        if (event.target.checked) {
-            const nameOfThePerson = event.target.previousSibling.textContent;
-            const month = event.target.dataset.text;
-            app.paymentList.forEach(person => {
-                if (person.name === nameOfThePerson) {
-                    person.paymentList.forEach(monthEl => {
-                        if (monthEl.month === month) {
-                            monthEl.isPaid = !monthEl.isPaid;
-                        } 
-                    });
-                } 
-            });
-        }
-        
+        const name = event.target.previousSibling.textContent;
+        const month = event.target.dataset.text;
+        handlers.findPersonOnPaymentList(month, name); 
         appStorage.paymentList.setPaymentList();
         handlers.displayPaymentList();
     },
@@ -1006,7 +1047,8 @@ const handlers = {
             }
         });
         
-        return result;
+        return result; // reduce
+
     },
     
     addPeopleToPaymentList() {   
@@ -1014,7 +1056,7 @@ const handlers = {
 
         app.listOfPeople.forEach(person => {
             const personOnPaymentList = this.createEachPersonOnPaymentList(person.name);            
-            if (app.paymentList.length && !hasBeenAddedToPaymentList) {
+            if (!hasBeenAddedToPaymentList) {
                 app.paymentList.push(personOnPaymentList);
             }
         });
@@ -1055,7 +1097,7 @@ const handlers = {
     createListId(list) {
         return list ? list.length : 0;
     },
-        
+
     createDanceSchedule(group, date, danceMoves) {
         const id = this.createListId(app.listOfDanceSchedules);
         function CreateDanceSchedule(group, date, danceMoves, id) {
@@ -1068,11 +1110,11 @@ const handlers = {
         return new CreateDanceSchedule (group, date, danceMoves, id);
     },
     
-    createNewMember(name, recommendedBy, startDate, group) {
+    createNewMember(name, findOutFrom, startDate, group) {
         const id = this.createListId(app.listOfPeople);
-        function Member(name, recommendedBy, startDate, group, id) {
+        function Member(name, findOutFrom, startDate, group, id) {
             this.name = name;
-            this.recommendedBy = recommendedBy;
+            this.findOutFrom = findOutFrom;
             this.startDate = startDate;
             this.group = group;
             this.danceList = [];
@@ -1080,7 +1122,7 @@ const handlers = {
             this.isDisabled = false;
         }
         
-        return new Member(name, recommendedBy, startDate, group, id);
+        return new Member(name, findOutFrom, startDate, group, id);
     },
     
     createAttendenceList(date) {

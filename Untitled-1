@@ -1,0 +1,8 @@
+dodaj showProfileButton na people-list.html on hover
+mozda dugme za brisanje koraka na profile pageu
+nadji cool ikonice i slike.. mozda neka css animacija
+checkbox green if true, red otherwise
+neki note sa svaki cas o muskim i zenskim koracima..
+stavi danceMoves u tabele npr.. figure i shines (solo koraci)
+pretvori danceList [{name: figures, danceMoves: [relo, comobo]}, {name: shines, danceMoves: [cucaracha, prvi levo]}]
+optional modal o upotrebi aplikacije .. tipa see app info if you are using it for the first time.. pa uputstvo o redosledu pravljenja koraka pa grupa pa osoba... itd

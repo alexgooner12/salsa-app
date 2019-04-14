@@ -2,19 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">>
     <title>Document</title>
 </head>
 <body onload="handlers.showGroupList()">
+    
+    <nav>
+       <ul>
+           <li><a href="main-page.html">Dance schedule page</a></li>
+           <li><a href="dance-list.html">Dance list page</a></li>
+           <li><a href="people-list.html">Members page</a></li>
+           <li><a href="profile-page.html">Profile page</a></li>
+           <li><a href="new-member-page.html">Add a member page</a></li>
+           <li><a href="group-list.html">Group list page</a></li>
+           <li><a href="attendance-list.html">Attendance list page</a></li>           
+           <li><a href="payment-list.html">Payment page</a></li>           
+       </ul>
+   </nav>
    
     <h2>List of Dance Groups</h2>
-    
-    
-    <input type="text" name="" class="group-maker-input" placeholder="Name of the group">
-    <button id="group-maker" onclick="handlers.createGroup(event)">Create a new group</button>
         
     <div class="group-list-container">
         
     </div>
+    
+    <input type="text" name="" class="group-maker-input" placeholder="Name of the group">
+    <button id="group-maker" onclick="handlers.createGroup(event)">Create a group</button>
     
     <script src="app.js"></script>
 </body>

@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">
     <title>Document</title>
 </head>
 <body onload="handlers.displayPeople()"> 
+   <nav>
+       <ul>
+           <li><a href="main-page.html">Dance schedule page</a></li>
+           <li><a href="dance-list.html">Dance list page</a></li>
+           <li><a href="people-list.html">Members page</a></li>
+           <li><a href="profile-page.html">Profile page</a></li>
+           <li><a href="new-member-page.html">Add a member page</a></li>
+           <li><a href="group-list.html">Group list page</a></li>
+           <li><a href="attendance-list.html">Attendance list page</a></li>           
+           <li><a href="payment-list.html">Payment page</a></li>           
+       </ul>
+   </nav>
+   
     <h2>Aqua Salseros</h2>
-    <button><a href="new-member-page.html">Add a new member</a></button>
+    <a href="new-member-page.html">Add a member</a>
     <!-- dodaj view profile button za svakog clana -->
     <table>
-     
-        <label for="">Sort by</label>
-        <select name="" id="select" onchange="handlers.sortPeopleList()">
-            <option value="name">Name</option>
-            <option value="name">Group</option>
-            <option value="name" selected>Date</option>
-        </select>
+         
+        <div class="people-list-sorter-container">
+            <label for="">Sort by</label>
+            <select name="" id="select" onchange="handlers.sortPeopleList()">
+                <option value="name">Name</option>
+                <option value="name">Group</option>
+                <option value="name" selected>Date</option>
+            </select>
+        </div>
         <tr>
             <th>Name</th>
-            <th>Recommended By</th>
+            <th>Found out from</th>
             <th>Started on</th>
             <th>Group</th>
         </tr>

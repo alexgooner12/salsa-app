@@ -1,0 +1,111 @@
+body {
+    font-family: 'Dancing Script', cursive;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    line-height: 1.7;
+    align-content: space-between;
+    align-items: center;
+    height: 300px;
+    background-color: rgba(255, 104, 232, 0.78);
+}
+
+select {
+    border: 1px dashed rgba(255, 104, 232, 0.78);
+    outline: none;
+}
+
+input{
+    border: none;
+    background: #00002;
+    outline: none;
+}
+
+button {
+    background-color: orchid;
+    border-radius: 15px;
+    padding: 4px 12px;
+    border: none;
+    cursor: pointer;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+}
+
+a {
+    background: #503332;
+    padding: 1px 7px;
+    text-decoration: none;
+    border-radius: 15px;
+    color: rgba(255, 104, 232, 0.78);
+}
+
+h2 {
+    font-size: 32px;
+}
+
+label {
+    font-size: 19px;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.person-shower {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    line-height: 1.6;
+    padding: 25px;
+    background-color: #f5b8d7;
+    border-radius: 15px;
+/*    margin: 10px solid white;*/
+}
+
+.people-list-sorter-container {
+    margin: 25px 0; 
+}
+
+table {
+    text-align: center;
+}
+
+.person-shower > label {
+    display: block;
+}
+
+.list-of-dance-moves {
+    margin: 20px 0;    
+}
+
+.dance-move-input {
+    border-radius: 15px;
+    border: none;
+    padding: 4px 11px;
+}
+
+.delete-dance-move-button {
+    padding: 2px 5px;
+    margin-left: 10px;
+}
+
+#add-dance-move-button {
+    margin-left: -45px;
+}
+
+.person-shower button {
+    width: 90px;
+    height: 32px;
+    border: 0;
+    border-radius: 11px;
+    background-color: #d13c20;
+}
