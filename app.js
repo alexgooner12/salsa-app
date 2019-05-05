@@ -202,7 +202,7 @@ const handlers = {
         if (app.listOfGroups.length) {
             app.listOfGroups.forEach((group, index) => {
                 const tr = this.createTrElement(index);
-                this.appendChildren(groupContainer, [this.createThElement('Group'), this.createThElement('Date'), this.createThElement('Choose a dance move')]);
+                this.appendChildren(groupContainer, [this.createThElement('Group', 'table-heading'), this.createThElement('Date', 'table-heading'), this.createThElement('Choose a dance move', 'table-heading')]);
                 this.appendChildren(tr, this.generateTrChildren(group, index));
                 result = tr;
                 groupContainer.appendChild(result);   
@@ -468,7 +468,7 @@ const handlers = {
                 const tr = this.createTrElement();
                 for (const prop in person) {
                     if (prop !== 'id' && prop !== 'isDisabled' && prop !== 'danceList') {
-                        const td = this.createTdElement(person[prop]);
+                        const td = this.createTdElement(person[prop], 'table-data');
                         tr.appendChild(td);   
                     }
                 }
@@ -477,9 +477,9 @@ const handlers = {
         });
     },
     
-    createTrElement(id='') {
+    createTrElement(id) {
         const tr = document.createElement('tr');
-        tr.id = id;
+        id ? tr.id = id : null;
         return tr;
     },
     
@@ -510,10 +510,10 @@ const handlers = {
     },
     
     getNewMemberRecommendation() {
-        const findOutFrom = document.getElementById('find-out-from-input').value || document.getElementById('list-of-members').value;
+        const foundOutFrom = document.getElementById('found-out-from-input').value || document.getElementById('list-of-members').value;
         document.getElementById('list-of-members').value = '';
-        document.getElementById('find-out-from-input').value = '';
-        return findOutFrom;
+        document.getElementById('found-out-from-input').value = '';
+        return foundOutFrom;
     },
     
     getNewMemberGroup() {
@@ -525,9 +525,9 @@ const handlers = {
     getNewMemberInfo() {
         const name = this.getNewMemberName();
         const startDate = this.getNewMemberStartDate();
-        const findOutFrom = this.getNewMemberRecommendation();
+        const foundOutFrom = this.getNewMemberRecommendation();
         const group = this.getNewMemberGroup();
-        return [name, findOutFrom, startDate, group]; // has to be in the correct order !
+        return [name, foundOutFrom, startDate, group]; // has to be in the correct order !
     },
     
     addNewMember() {
@@ -549,6 +549,10 @@ const handlers = {
         
         if (todaysIndex === 6 && !result) { 
             result = this.storeWeekend(todaysDate);
+        } else if (todaysIndex === 0) {
+            const saturday = todaysDate.setDate(todaysDate.getDate() - 1); 
+            const day = new Date(saturday);
+            result = this.getNextWeekend(day);
         } else {
             const nextDay = todaysDate.setDate(todaysDate.getDate() + 1);
             const day = new Date(nextDay);
@@ -597,7 +601,7 @@ const handlers = {
     },
     
     createProfileHeading(person, className) {
-        const heading = document.createElement('h2');
+        const heading = document.createElement('h3');
         heading.textContent = person.name;
         heading.classList.add(className);
         return heading;
@@ -619,7 +623,7 @@ const handlers = {
     
     createProfileRecommendation(person, className) {
         const label = document.createElement('label');
-        label.textContent = `Found out from ${person.findOutFrom}`;
+        label.textContent = `Found out from ${person.foundOutFrom}`;
         label.classList.add(className);
         return label;
     },
@@ -649,6 +653,7 @@ const handlers = {
         const index = event.target.id;
         app.listOfPeople[index].isDisabled = true;
         appStorage.listOfPeople.setListOfPeople();
+        handlers.initProfilePage();
     },
     
     createProfileDanceList(danceList) {
@@ -665,7 +670,7 @@ const handlers = {
     
     populateProfileConteinerElements(person) {
         const article = this.createProfileContainer('person-shower');
-        this.appendChildren(article, [this.createProfileHeading(person, 'name-shower'),                                                             this.createProfileStartDate(person, 'start-date-shower'),                                                     this.createProfileGroup(person, 'group-shower'),                                                               this.createProfileRecommendation(person, 'find-out-from-shower'),                                             this.getProfileAttendenceHistory(person.name),                                                                 this.createProfileDanceList(person.danceList),                                                                 this.createProfileDisableButton(person)])
+        this.appendChildren(article, [this.createProfileHeading(person, 'name-shower'),                                                               this.createProfileStartDate(person, 'start-date-shower'),                                                       this.createProfileGroup(person, 'group-shower'),                                                               this.createProfileRecommendation(person, 'find-out-from-shower'),                                               this.getProfileAttendenceHistory(person.name),                                                                 this.createProfileDanceList(person.danceList),                                                                 this.createProfileDisableButton(person)])
         return article;
     },
     
@@ -695,6 +700,7 @@ const handlers = {
             } 
         });
         appStorage.listOfPeople.setListOfPeople();
+        handlers.initProfilePage();
     },
     
     createRestorePersonButton(nameOfThePerson) {
@@ -774,8 +780,8 @@ const handlers = {
     },
     
     checkAttendenceCheckbox(event) {
-        const nameOfThePerson = event.target.parentElement.querySelector('.person-name').textContent;
-        const groupOfThePerson = event.target.parentElement.querySelector('.person-group').textContent;
+        const nameOfThePerson = event.target.parentElement.parentElement.querySelector('.person-name').textContent;
+        const groupOfThePerson = event.target.parentElement.parentElement.querySelector('.person-group').textContent;
         const date = event.target.dataset.text;
         const isPersonOnAttendenceList = handlers.isPersonOnAttendenceList(date, nameOfThePerson);
         
@@ -844,8 +850,8 @@ const handlers = {
         });
     },
     
-    removeDanceMovesFromPersonMistakenlyAddedToAttendeceList(date, nameOfThePerson, groupofThePerson) {
-        const danceMoves = this.getDanceMovesDoneOnThatDay(date, groupofThePerson);
+    removeDanceMovesFromPersonMistakenlyAddedToAttendeceList(date, nameOfThePerson, groupOfThePerson) {
+        const danceMoves = this.getDanceMovesDoneOnThatDay(date, groupOfThePerson);
         const person = this.getPerson(nameOfThePerson);
         const personDanceList = person[0].danceList;
         if (personDanceList.length) {
@@ -902,14 +908,24 @@ const handlers = {
     
     populatePersonOnAttendenceList(person, table, saturdaysDate, sundaysDate) {
         const tr = this.createTrElement();
-        this.appendChildren(tr, [this.createTdElement(person.name, 'person-name'),                                                              this.createTdElement(person.group, 'person-group'),                                                            this.createCheckbox(saturdaysDate, person.name, handlers.checkAttendenceCheckbox),                            this.createCheckbox(sundaysDate, person.name, handlers.checkAttendenceCheckbox)]);
+        const tdSaturday = this.createTdElement('', 'saturday');
+        tdSaturday.appendChild(this.createCheckbox(saturdaysDate, person.name, handlers.checkAttendenceCheckbox));
+        const tdSunday = this.createTdElement('', 'sunday');
+        tdSunday.appendChild(this.createCheckbox(sundaysDate, person.name, handlers.checkAttendenceCheckbox));
+        this.appendChildren(tr, [this.createTdElement(person.name, 'person-name'),                                                              this.createTdElement(person.group, 'person-group'),                                                            tdSaturday, tdSunday]);
         table.appendChild(tr);  
     },
     
     populateAttendenceList(table, saturdaysDate, sundaysDate) {
         const list = app.listOfPeople;
+        const groupsThatHadLessonsThatDay = [];
+        app.listOfDanceSchedules.forEach(schedule => {
+            if (schedule.date === saturdaysDate || schedule.data === sundaysDate) {
+                groupsThatHadLessonsThatDay.push(schedule.group);
+            }
+        });
         list.forEach(person => {
-            if (!person.isDisabled) {
+            if (!person.isDisabled && groupsThatHadLessonsThatDay.includes(person.group)) {
                 this.populatePersonOnAttendenceList(person, table, saturdaysDate, sundaysDate);
             }
         });   
@@ -1110,11 +1126,11 @@ const handlers = {
         return new CreateDanceSchedule (group, date, danceMoves, id);
     },
     
-    createNewMember(name, findOutFrom, startDate, group) {
+    createNewMember(name, foundOutFrom, startDate, group) {
         const id = this.createListId(app.listOfPeople);
-        function Member(name, findOutFrom, startDate, group, id) {
+        function Member(name, foundOutFrom, startDate, group, id) {
             this.name = name;
-            this.findOutFrom = findOutFrom;
+            this.foundOutFrom = foundOutFrom;
             this.startDate = startDate;
             this.group = group;
             this.danceList = [];
@@ -1122,7 +1138,7 @@ const handlers = {
             this.isDisabled = false;
         }
         
-        return new Member(name, findOutFrom, startDate, group, id);
+        return new Member(name, foundOutFrom, startDate, group, id);
     },
     
     createAttendenceList(date) {

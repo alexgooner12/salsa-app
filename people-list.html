@@ -7,26 +7,40 @@
     <title>Document</title>
 </head>
 <body onload="handlers.displayPeople()"> 
-   <nav>
-       <ul>
-           <li><a href="main-page.html">Dance schedule page</a></li>
-           <li><a href="dance-list.html">Dance list page</a></li>
-           <li><a href="people-list.html">Members page</a></li>
-           <li><a href="profile-page.html">Profile page</a></li>
-           <li><a href="new-member-page.html">Add a member page</a></li>
-           <li><a href="group-list.html">Group list page</a></li>
-           <li><a href="attendance-list.html">Attendance list page</a></li>           
-           <li><a href="payment-list.html">Payment page</a></li>           
-       </ul>
-   </nav>
+    <nav class="navigation">
+        <ul class="navigation__list">
+            <li class="navigation__item">
+               <a class="navigation__link" href="main-page.html">Dance schedule page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="dance-list.html">Dance list page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="people-list.html">Members page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="profile-page.html">Profile page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="new-member-page.html">Add a member page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="group-list.html">Group list page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="attendance-list.html">Attendance list page</a>
+            </li>           
+            <li class="navigation__item">
+                <a class="navigation__link" href="payment-list.html">Payment page</a>
+            </li>           
+        </ul>
+    </nav>
    
-    <h2>Aqua Salseros</h2>
+    <h2 class="heading">Aqua Salseros</h2>
     <a href="new-member-page.html">Add a member</a>
-    <!-- dodaj view profile button za svakog clana -->
-    <table>
-         
+    <table class="group-container">  
         <div class="people-list-sorter-container">
-            <label for="">Sort by</label>
+            <label for="select">Sort by</label>
             <select name="" id="select" onchange="handlers.sortPeopleList()">
                 <option value="name">Name</option>
                 <option value="name">Group</option>

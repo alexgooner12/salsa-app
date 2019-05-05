@@ -7,29 +7,40 @@
     <title>Document</title>
 </head>
 <body onload="handlers.getDanceScheduleElements(event)">
-   <nav>
-       <ul>
-           <li><a href="main-page.html">Dance schedule page</a></li>
-           <li><a href="dance-list.html">Dance list page</a></li>
-           <li><a href="people-list.html">Members page</a></li>
-           <li><a href="profile-page.html">Profile page</a></li>
-           <li><a href="new-member-page.html">Add a member page</a></li>
-           <li><a href="group-list.html">Group list page</a></li>
-           <li><a href="attendance-list.html">Attendance list page</a></li>           
-           <li><a href="payment-list.html">Payment page</a></li>           
-       </ul>
-   </nav>
-   
-   <h2>Class Schedule</h2>
-    <!-- prikazi korake u formi labela i checkbox i dodaj dugme addAClassSchedule, 
-    dodaj paid property i neki alert(modal) ko sve nije platio nakon na primer pola meseca..
-    rating koraka (mozda), add a new group, emphasize added danceMoves letters - filterThru funkcija -->
+    <nav class="navigation">
+        <ul class="navigation__list">
+            <li class="navigation__item">
+               <a class="navigation__link" href="main-page.html">Dance schedule page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="dance-list.html">Dance list page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="people-list.html">Members page</a>
+            </li>
+            <li class="navigation__item">
+               <a class="navigation__link" href="profile-page.html">Profile page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="new-member-page.html">Add a member page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="group-list.html">Group list page</a>
+            </li>
+            <li class="navigation__item">
+                <a class="navigation__link" href="attendance-list.html">Attendance list page</a>
+            </li>           
+            <li class="navigation__item">
+                <a class="navigation__link" href="payment-list.html">Payment page</a>
+            </li>           
+        </ul>
+    </nav>
+    
+    <h2 class="heading">Class Schedule</h2>
     <a href="group-list.html">Create a group</a>
-    <table class="group-container">
-    
-    </table>
-    
+    <table class="group-container"></table>
     
     <script src="app.js"></script>
+    <script src="testing.js"></script>
 </body>
 </html>

@@ -7,7 +7,6 @@ body {
     line-height: 1.7;
     align-content: space-between;
     align-items: center;
-    height: 300px;
     background-color: rgba(255, 104, 232, 0.78);
 }
 
@@ -20,6 +19,8 @@ input{
     border: none;
     background: #00002;
     outline: none;
+    border-radius: 15px;
+    padding: 4px 11px;
 }
 
 button {
@@ -43,8 +44,12 @@ a {
     color: rgba(255, 104, 232, 0.78);
 }
 
-h2 {
-    font-size: 32px;
+.heading {
+    font-size: 35px;
+}
+
+.name-shower {
+    font-size: 30px;
 }
 
 label {
@@ -57,6 +62,13 @@ ul {
     padding: 0;
 }
 
+.profile {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    margin-top: 20px;
+}
+
 .person-shower {
     display: flex;
     flex-wrap: wrap;
@@ -64,19 +76,23 @@ ul {
     justify-content: space-between;
     align-items: center;
     text-align: center;
-    line-height: 1.6;
-    padding: 25px;
+    padding: 0 25px;
     background-color: #f5b8d7;
     border-radius: 15px;
-/*    margin: 10px solid white;*/
+    min-width: 350px;
+    min-height: 500px;
 }
 
-.people-list-sorter-container {
-    margin: 25px 0; 
+.person-shower:nth-child(odd) {
+    margin-right: 1px;
 }
 
 table {
     text-align: center;
+}
+
+.people-list-sorter-container {
+    margin-top: 35px;
 }
 
 .person-shower > label {
@@ -85,12 +101,6 @@ table {
 
 .list-of-dance-moves {
     margin: 20px 0;    
-}
-
-.dance-move-input {
-    border-radius: 15px;
-    border: none;
-    padding: 4px 11px;
 }
 
 .delete-dance-move-button {
@@ -108,4 +118,15 @@ table {
     border: 0;
     border-radius: 11px;
     background-color: #d13c20;
+    margin: 25px 0 50px 0;
+}
+
+.group-container, .group-list-container {
+    margin: 50px 0;
+    min-width: 440px;
+    text-align: center;
+}
+
+#group-maker {
+    margin-left: -45px;
 }
